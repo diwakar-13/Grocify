@@ -1,13 +1,20 @@
+import { useGroceryStore } from "@/store/grocery-store";
 import { useAuth } from "@clerk/expo";
 import { Redirect } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { useColorScheme } from "nativewind";
+import { useEffect } from "react";
 
 export default function Layout() {
   const { isSignedIn, isLoaded } = useAuth();
   const { colorScheme } = useColorScheme();
+  const { loadItems, items } = useGroceryStore();
   const isDark = colorScheme === "dark";
   const tabTintColor = isDark ? "hsl(142 70% 54%)" : "hsl(147 75% 33%)";
+
+  useEffect(() => {
+    loadItems();
+  }, []);
 
   if (!isLoaded) {
     return null;
@@ -18,13 +25,13 @@ export default function Layout() {
   }
 
   return (
-    <NativeTabs 
+    <NativeTabs
       tintColor={tabTintColor}
       // Android aur iOS dono par accurate container structure dene ke liye class use karein
       className="bg-card dark:bg-background border-t border-border/40"
     >
       {/* List Tab */}
-      <NativeTabs.Trigger 
+      <NativeTabs.Trigger
         name="index"
         className="flex-1 items-center justify-center py-2 min-h-[56px]"
       >
@@ -41,7 +48,7 @@ export default function Layout() {
       </NativeTabs.Trigger>
 
       {/* Planner Tab */}
-      <NativeTabs.Trigger 
+      <NativeTabs.Trigger
         name="planner"
         className="flex-1 items-center justify-center py-2 min-h-[56px]"
       >
@@ -55,7 +62,7 @@ export default function Layout() {
       </NativeTabs.Trigger>
 
       {/* Insights Tab */}
-      <NativeTabs.Trigger 
+      <NativeTabs.Trigger
         name="insights"
         className="flex-1 items-center justify-center py-2 min-h-[56px]"
       >

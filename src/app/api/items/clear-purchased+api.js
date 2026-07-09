@@ -1,14 +1,22 @@
 import { clearPurchasedItems } from "@/lib/server/db-action";
 
-export async function POST() {
+function getUserId(request) {
+  const authHeader = request.headers.get("authorization") || request.headers.get("Authorization");
+  if (!authHeader) return null;
   try {
-    await clearPurchasedItems();
+    const base64Url = authHeader.replace("Bearer ", "").split('.')[1];
+    return JSON.parse(Buffer.from(base64Url.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString()).sub;
+  } catch (e) { return null; }
+}
+
+export async function POST(request) {
+  try {
+    const userId = getUserId(request);
+    if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
+    await clearPurchasedItems(userId);
     return Response.json({ ok: true });
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to clear completed items";
-    return Response.json({ error: message }, { status: 500 });
+    return Response.json({ error: error.message }, { status: 500 });
   }
 }

@@ -1,7 +1,14 @@
 import { useGroceryStore } from "@/store/grocery-store";
+import { useAuth } from "@clerk/expo";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 const categories = ["Produce", "Dairy", "Bakery", "Pantry", "Snacks"];
 const priorities = ["low", "medium", "high"];
@@ -14,14 +21,15 @@ const categoryIcons = {
   Snacks: "cookie-bite",
 };
 
+// ✅ Removed 'async' from the component definition
 const PlannerFormCard = () => {
+  const { getToken } = useAuth();
   const { error, addItem } = useGroceryStore();
 
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [category, setCategory] = useState("Produce");
   const [priority, setPriority] = useState("medium");
-  // ⚡ Add local loading/submitting state
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canCreate = name.trim().length > 0 && !isSubmitting;
@@ -36,16 +44,22 @@ const PlannerFormCard = () => {
 
     setIsSubmitting(true);
 
-    // ⚡ SAFE CHECK: Agar field khali ho ya 0 ho, toh fallback default 1 bhejega
+    // Safe fallback check for quantity
     const parsedQuantity = Math.max(1, Number(quantity));
 
     try {
-      await addItem({
-        name: name.trim(),
-        category,
-        priority,
-        quantity: parsedQuantity,
-      });
+      // ✅ Fetch the token safely inside the submit handler
+      const token = await getToken();
+
+      await addItem(
+        {
+          name: name.trim(),
+          category,
+          priority,
+          quantity: parsedQuantity,
+        },
+        token,
+      );
 
       // Reset form cleanly if successful
       setName("");
@@ -62,16 +76,10 @@ const PlannerFormCard = () => {
   return (
     <View className="rounded-3xl border border-border bg-card p-4">
       {/* NAME */}
-      <Text className="text-sm font-semibold text-foreground">
-        Item name
-      </Text>
+      <Text className="text-sm font-semibold text-foreground">Item name</Text>
 
       <View className="mt-2 flex-row items-center rounded-2xl border border-border bg-muted px-4 py-3">
-        <FontAwesome6
-          name="bag-shopping"
-          size={13}
-          color="#5b7567"
-        />
+        <FontAwesome6 name="bag-shopping" size={13} color="#5b7567" />
 
         <TextInput
           value={name}
@@ -89,11 +97,7 @@ const PlannerFormCard = () => {
       </Text>
 
       <View className="mt-2 flex-row items-center rounded-2xl border border-border bg-muted px-4 py-3">
-        <FontAwesome6
-          name="hashtag"
-          size={13}
-          color="#5b7567"
-        />
+        <FontAwesome6 name="hashtag" size={13} color="#5b7567" />
 
         <TextInput
           value={quantity}
@@ -156,8 +160,8 @@ const PlannerFormCard = () => {
             option === "high"
               ? "bolt"
               : option === "medium"
-              ? "compass"
-              : "seedling";
+                ? "compass"
+                : "seedling";
 
           return (
             <Pressable
@@ -207,9 +211,7 @@ const PlannerFormCard = () => {
 
         <Text
           className={`ml-2 text-base font-semibold ${
-            canCreate
-              ? "text-primary-foreground"
-              : "text-muted-foreground"
+            canCreate ? "text-primary-foreground" : "text-muted-foreground"
           }`}
         >
           {isSubmitting ? "Adding to Grocery List..." : "Add to Grocery List"}

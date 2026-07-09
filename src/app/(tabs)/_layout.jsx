@@ -11,10 +11,23 @@ export default function Layout() {
   const { loadItems, items } = useGroceryStore();
   const isDark = colorScheme === "dark";
   const tabTintColor = isDark ? "hsl(142 70% 54%)" : "hsl(147 75% 33%)";
+  const { getToken } = useAuth();
 
   useEffect(() => {
-    loadItems();
-  }, []);
+    const loadItem = async () => {
+      if (!isLoaded || !isSignedIn) return;
+      try {
+        const token = await getToken();
+        if (token) {
+          await loadItems(token);
+        }
+      } catch (error) {
+        console.error("Layout mount fetch failed:", error);
+      }
+    };
+
+    loadItem();
+  }, [isLoaded, isSignedIn]);
 
   if (!isLoaded) {
     return null;

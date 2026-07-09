@@ -1,12 +1,11 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-
+import { View } from "react-native";
+import { UserButton } from '@clerk/expo/native'
 const insights = () => {
   return (
-    <View>
-      <Text>insights</Text>
+    <View className="flex-1 items-center justify-center">
+     <UserButton />
     </View>
-  )
-}
+  );
+};
 
-export default insights
+export default insights;

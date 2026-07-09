@@ -2,6 +2,7 @@ import { bigint, boolean, integer, pgTable, text } from "drizzle-orm/pg-core";
 
 export const groceryItems = pgTable("grocery_items", {
   id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   name: text("name").notNull(),
   category: text("category").notNull(),
   quantity: integer("quantity").notNull().default(1),

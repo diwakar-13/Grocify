@@ -22,18 +22,17 @@ export const useGroceryStore = create((set, get) => ({
 
   addItem: async (input) => {
     set({ error: null });
-    // Temporary ID real-time UI render ke liye jab tak DB response na de
+    
     const tempId = `temp-${Date.now()}`;
     const optimisticItem = {
       id: tempId,
       name: input.name,
       category: input.category,
       quantity: Math.max(1, input.quantity),
-      priority: input.priority,
+      priority: input.priority || "low",
       purchased: false,
     };
 
-    // ⚡ INSTANT UI UPDATE
     const previousItems = get().items;
     set({ items: [optimisticItem, ...previousItems] });
 
@@ -50,9 +49,11 @@ export const useGroceryStore = create((set, get) => ({
       });
 
       const payload = await res.json();
-      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      
+      if (!res.ok) {
+        throw new Error(payload.message || `Request failed (${res.status})`);
+      }
 
-      // Real DB entry se temporary item ko replace karein
       set((state) => ({
         items: state.items.map((item) =>
           item.id === tempId ? payload.item : item,
@@ -60,18 +61,24 @@ export const useGroceryStore = create((set, get) => ({
       }));
       return payload.item;
     } catch (error) {
-      console.error("Error adding item:", error);
-      set({ items: previousItems, error: "Failed to add item" }); // Rollback
+      console.error("💥 Error backend side se hai:", error.message);
+      
+      set({ 
+        items: previousItems, 
+        error: error.message || "Failed to add item" 
+      });
+      
+      // Screen par readable Alert dikhane ke liye (Optional par badhiya hai)
+      // import { Alert } from 'react-native';
+      // Alert.alert("Error", error.message || "Server didn't accept the item");
     }
   },
 
   updateQuantity: async (id, quantity) => {
     const nextQuantity = Math.max(1, quantity);
     set({ error: null });
-
     const previousItems = get().items;
 
-    // ⚡ INSTANT QUANTITY UPDATE IN UI
     set((state) => ({
       items: state.items.map((item) =>
         item.id === id ? { ...item, quantity: nextQuantity } : item,
@@ -85,18 +92,15 @@ export const useGroceryStore = create((set, get) => ({
         body: JSON.stringify({ quantity: nextQuantity }),
       });
 
-      if (!res.ok) throw new Error(`Request failed (${res.status})`);
-
       const payload = await res.json();
-     
+      if (!res.ok) throw new Error(payload.message || `Request failed (${res.status})`);
+
       set((state) => ({
-        items: state.items.map((item) =>
-          item.id === id ? payload.item : item,
-        ),
+        items: state.items.map((item) => (item.id === id ? payload.item : item)),
       }));
     } catch (error) {
       console.error("Error updating quantity:", error);
-      set({ items: previousItems, error: "Failed to update quantity" }); 
+      set({ items: previousItems, error: error.message || "Failed to update quantity" });
     }
   },
 
@@ -108,7 +112,6 @@ export const useGroceryStore = create((set, get) => ({
 
     const nextPurchased = !currentItem.purchased;
 
-    // ⚡ INSTANT CHECKBOX/PURCHASED TOGGLE
     set((state) => ({
       items: state.items.map((item) =>
         item.id === id ? { ...item, purchased: nextPurchased } : item,
@@ -122,17 +125,15 @@ export const useGroceryStore = create((set, get) => ({
         body: JSON.stringify({ purchased: nextPurchased }),
       });
 
-      if (!res.ok) throw new Error(`Request failed (${res.status})`);
-
       const payload = await res.json();
+      if (!res.ok) throw new Error(payload.message || `Request failed (${res.status})`);
+
       set((state) => ({
-        items: state.items.map((item) =>
-          item.id === id ? payload.item : item,
-        ),
+        items: state.items.map((item) => (item.id === id ? payload.item : item)),
       }));
     } catch (error) {
       console.error("Error toggling purchased:", error);
-      set({ items: previousItems, error: "Failed to update status" }); // Rollback
+      set({ items: previousItems, error: error.message || "Failed to update status" });
     }
   },
 
@@ -140,7 +141,6 @@ export const useGroceryStore = create((set, get) => ({
     set({ error: null });
     const previousItems = get().items;
 
-    // ⚡ INSTANT REMOVE FROM UI
     set((state) => ({
       items: state.items.filter((item) => item.id !== id),
     }));
@@ -150,7 +150,7 @@ export const useGroceryStore = create((set, get) => ({
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
     } catch (error) {
       console.error("Error removing item:", error);
-      set({ items: previousItems, error: "Failed to remove item" }); // Rollback
+      set({ items: previousItems, error: "Failed to remove item" });
     }
   },
 
@@ -158,7 +158,6 @@ export const useGroceryStore = create((set, get) => ({
     set({ error: null });
     const previousItems = get().items;
 
-    // ⚡ INSTANT UI CLEAR
     set({ items: previousItems.filter((item) => !item.purchased) });
 
     try {
@@ -166,7 +165,7 @@ export const useGroceryStore = create((set, get) => ({
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
     } catch (error) {
       console.error("Error clearing purchased:", error);
-      set({ items: previousItems, error: "Failed to clear items" }); // Rollback
+      set({ items: previousItems, error: "Failed to clear items" });
     }
   },
 }));

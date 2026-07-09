@@ -8,7 +8,7 @@
     "scheme": "grocify",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/images/icon.png"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +18,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.Grocify"
+      "package": "com.diwakar.grocify"
     },
     "web": {
       "output": "server",
@@ -35,7 +35,6 @@
           "imageWidth": 76
         }
       ],
-      "@clerk/expo",
       "expo-secure-store",
       "expo-web-browser",
       [
@@ -45,13 +44,18 @@
           "project": "grocify",
           "organization": "diwakar-pandey"
         }
-      ],
-      "@sentry/react-native"
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true,
       "tsconfigPaths": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "fd76dd66-de3b-46b9-a312-f7b1cf58851b"
+      }
     }
   }
 }

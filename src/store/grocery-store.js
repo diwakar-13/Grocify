@@ -1,5 +1,7 @@
 import { create } from "zustand";
 
+const BASE_URL = "";
+
 export const useGroceryStore = create((set, get) => ({
   items: [],
   isLoading: false,
@@ -10,7 +12,7 @@ export const useGroceryStore = create((set, get) => ({
     if (!token) return;
     set({ isLoading: true, error: null });
     try {
-      const res = await fetch("/api/items", {
+      const res = await fetch(`${BASE_URL}/api/items`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -46,7 +48,7 @@ export const useGroceryStore = create((set, get) => ({
     set({ items: [optimisticItem, ...previousItems] });
 
     try {
-      const res = await fetch("/api/items", {
+      const res = await fetch("`${BASE_URL}/api/items`", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -93,7 +95,7 @@ export const useGroceryStore = create((set, get) => ({
     }));
 
     try {
-      const res = await fetch(`/api/items/${id}`, {
+      const res = await fetch(`${BASE_URL}/api/items/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -137,7 +139,7 @@ export const useGroceryStore = create((set, get) => ({
     }));
 
     try {
-      const res = await fetch(`/api/items/${id}`, {
+      const res = await fetch(`${BASE_URL}/api/items/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -175,7 +177,7 @@ export const useGroceryStore = create((set, get) => ({
     }));
 
     try {
-      const res = await fetch(`/api/items/${id}`, {
+      const res = await fetch(`${BASE_URL}/api/items/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -197,7 +199,7 @@ export const useGroceryStore = create((set, get) => ({
     set({ items: previousItems.filter((item) => !item.purchased) });
 
     try {
-      const res = await fetch("/api/items/clear-purchased", {
+      const res = await fetch(`${BASE_URL}/api/items/clear-purchased`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

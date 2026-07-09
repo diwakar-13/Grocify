@@ -27,8 +27,17 @@ export default function ListScreen() {
             <Text className="text-sm font-semibold uppercase tracking-[1px] text-muted-foreground">
               Shopping items
             </Text>
-            <Text className="text-sm text-muted-foreground">{pendingItems.length} active</Text>
+            <Text className="text-sm text-muted-foreground">
+              {pendingItems.length} active
+            </Text>
           </View>
+        </View>
+      }
+      ListEmptyComponent={
+        <View className="flex-1 items-center justify-center py-20">
+          <Text className="text-muted-foreground text-base font-medium text-center">
+            No items found. Your grocery list is empty! 🛒
+          </Text>
         </View>
       }
       ListFooterComponent={<CompletedItems />}
